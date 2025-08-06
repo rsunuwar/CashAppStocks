@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">CashAppStocks</string>
+    <string name="cash_app_stocks">Cash App Stocks</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_stocks">No Stocks available currently. Click Reload Stocks to load again!!!</string>
+    <string name="reload">Reload Stocks</string>
+</resources>
