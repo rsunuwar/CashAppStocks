@@ -3,14 +3,15 @@ package com.example.cashappstocks.network
 import com.example.cashappstocks.models.Stocks
 import retrofit2.http.GET
 import retrofit2.http.Url
+import kotlin.jvm.Throws
 
 interface StocksApi {
 
-    // https://storage.googleapis.com/cash-homework/cash-stocks-api/portfolio.json
     /**
      * Method to fetch stocks from the endpoint
      */
-    @GET("/cash-homework/cash-stocks-api/portfolio.json")
+    @GET("/cash-homework/cash-stocks-api/portfolio_malformed.json")
+    @Throws(Exception::class)
     suspend fun getStocks(): Stocks
 
     /**

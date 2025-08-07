@@ -1,6 +1,5 @@
 package com.example.cashappstocks.ui.screens
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cashappstocks.R
@@ -9,16 +8,19 @@ import com.example.cashappstocks.models.Stocks
 import com.example.cashappstocks.models.StocksViewState
 import com.example.cashappstocks.network.StocksApi
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class StocksListViewModel @Inject constructor(private val stocksApi: StocksApi) : ViewModel() {
+class StocksListViewModel @Inject constructor(
+    private val stocksApi: StocksApi,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : ViewModel() {
 
     companion object {
         val TAG: String = StocksListViewModel::javaClass.name
@@ -30,22 +32,20 @@ class StocksListViewModel @Inject constructor(private val stocksApi: StocksApi) 
 
     // method to loads stocks from the network
     fun loadStocks() {
-        viewModelScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.IO) {
-                try {
-                    _stockViewStateFlow.value = StocksViewState.Loading
+        viewModelScope.launch(ioDispatcher) {
+            try {
+                _stockViewStateFlow.value = StocksViewState.Loading
 
-                    //delay(1000) // delay to test Loading state
-                    val result = stocksApi.getStocks()
+                //delay(1000) // delay to test Loading state
+                val result = stocksApi.getStocks()
 
-                    _stockViewStateFlow.value = StocksViewState.Result(result)
+                _stockViewStateFlow.value = StocksViewState.Result(result)
 
-                } catch (e: Exception) {
-                    val message = e.message.toString()
-                    Log.e(TAG, "Error loading stocks, error = $message")
-                    _stockViewStateFlow.value =
-                        StocksViewState.LoadingError(errorMessageId = R.string.error_loading)
-                }
+            } catch (e: Exception) {
+                val message = e.message.toString()
+                println("Error loading stocks, error=$message")
+                _stockViewStateFlow.value =
+                    StocksViewState.LoadingError(errorMessageId = R.string.error_loading)
             }
         }
     }
