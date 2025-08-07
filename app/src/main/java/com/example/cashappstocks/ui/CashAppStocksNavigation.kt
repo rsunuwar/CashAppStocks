@@ -23,6 +23,7 @@ fun CashAppStocksNavigation() {
         startDestination = StocksScreensName.MainScreen.name
     ) {
 
+        // Stocks List screen
         composable(route = StocksScreensName.MainScreen.name) {
             val stocksVM = hiltViewModel<StocksListViewModel>()
             StocksListScreen(
@@ -34,10 +35,12 @@ fun CashAppStocksNavigation() {
                 })
         }
 
+        // About Screen
         composable(route = StocksScreensName.AboutScreen.name) {
             AboutScreen { navController.popBackStack() }
         }
 
+        // Details Screen with just one stock
         composable(route = "${StocksScreensName.DetailsScreen.name}/{name}/{priceInDollars}",
             arguments = listOf(
                 navArgument(name = "name") {

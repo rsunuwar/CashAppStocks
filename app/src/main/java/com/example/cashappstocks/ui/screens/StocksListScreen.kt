@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -98,20 +99,24 @@ fun StocksScreen(
 
         when (stocksViewState) {
 
+            // stocks not yet loaded
             is StocksViewState.UnInitialized -> EmptyStocksScreen(
                 message = stringResource(R.string.load_stocks_message),
                 buttonTitle = stringResource(R.string.load),
                 onReloadClicked = onLoadClicked
             )
 
+            // stocks are loading - waiting for network result
             is StocksViewState.Loading -> ProgressScreen()
 
+            // error occurred while fetching stocks
             is StocksViewState.LoadingError -> EmptyStocksScreen(
                 message = stringResource(stocksViewState.errorMessageId),
                 buttonTitle = stringResource(R.string.try_again),
                 onReloadClicked = onLoadClicked
             )
 
+            // network request returned a result - either some data or empty list
             is StocksViewState.Result -> StocksResultScreen(
                 stocksViewState.result,
                 onReloadClicked = onLoadClicked,
@@ -154,7 +159,7 @@ fun StocksResultScreen(
     } else {
         LazyColumn(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(16.dp)
         ) {
 
             items(stocks.stockList) { stock ->
@@ -162,7 +167,7 @@ fun StocksResultScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .clickable {
-                            onStockRowClicked(stock.name, stock.priceInDollars().toString())
+                            onStockRowClicked(stock.name, stock.priceInDollars().toString()) // navigates to details screen
                         }
                 ) {
                     Text("Ticker: ${stock.ticker}")
@@ -175,7 +180,7 @@ fun StocksResultScreen(
                     Text("Current Time: ${stock.currentDateTime()}")
                 }
 
-                HorizontalDivider()
+                HorizontalDivider(Modifier.height(8.dp))
             }
         }
     }

@@ -22,10 +22,6 @@ class StocksListViewModel @Inject constructor(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
-    companion object {
-        val TAG: String = StocksListViewModel::javaClass.name
-    }
-
     private val _stockViewStateFlow =
         MutableStateFlow<StocksViewState>(StocksViewState.UnInitialized)
     val stockViewStateFlow: StateFlow<StocksViewState> = _stockViewStateFlow.asStateFlow()
@@ -51,6 +47,7 @@ class StocksListViewModel @Inject constructor(
     }
 }
 
+// test data for modeling / testing
 val testData = Stocks(
     listOf(
         Stock(

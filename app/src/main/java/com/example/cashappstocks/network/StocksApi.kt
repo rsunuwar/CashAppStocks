@@ -10,7 +10,7 @@ interface StocksApi {
     /**
      * Method to fetch stocks from the endpoint
      */
-    @GET("/cash-homework/cash-stocks-api/portfolio_malformed.json")
+    @GET("/cash-homework/cash-stocks-api/portfolio.json")
     @Throws(Exception::class)
     suspend fun getStocks(): Stocks
 
