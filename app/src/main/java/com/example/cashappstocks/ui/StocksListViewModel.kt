@@ -3,13 +3,17 @@ package com.example.cashappstocks.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cashappstocks.R
 import com.example.cashappstocks.models.Stock
 import com.example.cashappstocks.models.Stocks
+import com.example.cashappstocks.models.StocksViewState
 import com.example.cashappstocks.network.NetworkRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class StocksListViewModel : ViewModel() {
 
@@ -17,24 +21,29 @@ class StocksListViewModel : ViewModel() {
         val TAG: String = StocksListViewModel::javaClass.name
     }
 
-    private val _stockListFlow = MutableStateFlow(Stocks(emptyList()))
-    val stockListFlow: StateFlow<Stocks> = _stockListFlow.asStateFlow()
+    private val _stockViewStateFlow =
+        MutableStateFlow<StocksViewState>(StocksViewState.UnInitialized)
+    val stockViewStateFlow: StateFlow<StocksViewState> = _stockViewStateFlow.asStateFlow()
 
     private val stocksApi = NetworkRequest.getStocksApi()
 
-    init {
-        loadStocks()
-    }
-
     fun loadStocks() {
-        viewModelScope.launch {
-            try {
-                _stockListFlow.value = stocksApi.getStocks()
+        viewModelScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
+                try {
+                    _stockViewStateFlow.value = StocksViewState.Loading
 
-            } catch (e: Exception) {
-                _stockListFlow.value = Stocks(emptyList())
-                val message = e.message.toString()
-                Log.e(TAG, "Error loading stocks, error = $message")
+                    //delay(1000)
+                    val result = stocksApi.getStocks()
+
+                    _stockViewStateFlow.value = StocksViewState.Result(result)
+
+                } catch (e: Exception) {
+                    val message = e.message.toString()
+                    Log.e(TAG, "Error loading stocks, error = $message")
+                    _stockViewStateFlow.value =
+                        StocksViewState.LoadingError(errorMessageId = R.string.error_loading)
+                }
             }
         }
     }
