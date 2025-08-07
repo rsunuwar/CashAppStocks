@@ -7,15 +7,18 @@ import com.example.cashappstocks.R
 import com.example.cashappstocks.models.Stock
 import com.example.cashappstocks.models.Stocks
 import com.example.cashappstocks.models.StocksViewState
-import com.example.cashappstocks.network.NetworkRequest
+import com.example.cashappstocks.network.StocksApi
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class StocksListViewModel : ViewModel() {
+@HiltViewModel
+class StocksListViewModel @Inject constructor(private val stocksApi: StocksApi) : ViewModel() {
 
     companion object {
         val TAG: String = StocksListViewModel::javaClass.name
@@ -24,8 +27,6 @@ class StocksListViewModel : ViewModel() {
     private val _stockViewStateFlow =
         MutableStateFlow<StocksViewState>(StocksViewState.UnInitialized)
     val stockViewStateFlow: StateFlow<StocksViewState> = _stockViewStateFlow.asStateFlow()
-
-    private val stocksApi = NetworkRequest.getStocksApi()
 
     // method to loads stocks from the network
     fun loadStocks() {

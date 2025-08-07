@@ -35,7 +35,6 @@ import com.example.cashappstocks.ui.theme.CashAppStocksTheme
 fun StocksListScreen(viewModel: StocksListViewModel) {
 
     val stocksViewState by viewModel.stockViewStateFlow.collectAsStateWithLifecycle()
-//    val stocksViewState = StocksViewState.Result(testData) // for testing without actual network request
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
