@@ -8,4 +8,6 @@
     <string name="reload">Reload Stocks</string>
     <string name="try_again">Try Again</string>
     <string name="error_loading">There was an error loading stocks. Please try again later!</string>
+    <string name="about">About</string>
+    <string name="about_page">This is about page for stocks app.</string>
 </resources>

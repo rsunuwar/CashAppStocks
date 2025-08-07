@@ -1,4 +1,4 @@
-package com.example.cashappstocks.ui
+package com.example.cashappstocks.ui.screens
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

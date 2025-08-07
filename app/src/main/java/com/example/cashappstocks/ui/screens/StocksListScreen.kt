@@ -1,5 +1,6 @@
-package com.example.cashappstocks.ui
+package com.example.cashappstocks.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,12 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.cashappstocks.R
 import com.example.cashappstocks.models.Stocks
@@ -32,7 +35,11 @@ import com.example.cashappstocks.ui.theme.CashAppStocksTheme
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun StocksListScreen(viewModel: StocksListViewModel) {
+fun StocksListScreen(
+    viewModel: StocksListViewModel,
+    onAboutClicked: () -> Unit,
+    onStockRowClicked: (String, String) -> Unit
+) {
 
     val stocksViewState by viewModel.stockViewStateFlow.collectAsStateWithLifecycle()
 
@@ -49,24 +56,26 @@ fun StocksListScreen(viewModel: StocksListViewModel) {
                 actions = {
                     TextButton(
                         modifier = Modifier.semantics {
-                            contentDescription = "Reload stocks"
+                            contentDescription = "About page"
                         },
-                        onClick = {
-                            viewModel.loadStocks()
-                        }
+                        onClick = onAboutClicked
                     ) {
-                        Text(stringResource(R.string.refresh))
+                        Text(
+                            stringResource(R.string.about),
+                            fontSize = 16.sp,
+                            color = Color.Blue
+                        )
                     }
-                }
-            )
+                })
         }) { innerPadding ->
 
         StocksScreen(
             modifier = Modifier.padding(innerPadding),
             stocksViewState,
-            onReloadClicked = {
+            onLoadClicked = {
                 viewModel.loadStocks()
-            }
+            },
+            onStockRowClicked = onStockRowClicked
         )
     }
 }
@@ -76,7 +85,8 @@ fun StocksListScreen(viewModel: StocksListViewModel) {
 fun StocksScreen(
     modifier: Modifier = Modifier,
     stocksViewState: StocksViewState,
-    onReloadClicked: () -> Unit
+    onLoadClicked: () -> Unit,
+    onStockRowClicked: (String, String) -> Unit
 ) {
 
     Column(
@@ -91,7 +101,7 @@ fun StocksScreen(
             is StocksViewState.UnInitialized -> EmptyStocksScreen(
                 message = stringResource(R.string.load_stocks_message),
                 buttonTitle = stringResource(R.string.load),
-                onReloadClicked = onReloadClicked
+                onReloadClicked = onLoadClicked
             )
 
             is StocksViewState.Loading -> ProgressScreen()
@@ -99,12 +109,13 @@ fun StocksScreen(
             is StocksViewState.LoadingError -> EmptyStocksScreen(
                 message = stringResource(stocksViewState.errorMessageId),
                 buttonTitle = stringResource(R.string.try_again),
-                onReloadClicked = onReloadClicked
+                onReloadClicked = onLoadClicked
             )
 
             is StocksViewState.Result -> StocksResultScreen(
                 stocksViewState.result,
-                onReloadClicked = onReloadClicked
+                onReloadClicked = onLoadClicked,
+                onStockRowClicked = onStockRowClicked
             )
         }
     }
@@ -129,7 +140,8 @@ fun ProgressScreen() {
 @Composable
 fun StocksResultScreen(
     stocks: Stocks,
-    onReloadClicked: () -> Unit
+    onReloadClicked: () -> Unit,
+    onStockRowClicked: (String, String) -> Unit
 ) {
 
     if (stocks.stockList.isEmpty()) {
@@ -141,19 +153,27 @@ fun StocksResultScreen(
 
     } else {
         LazyColumn(
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier
+                .padding(8.dp)
         ) {
 
             items(stocks.stockList) { stock ->
-
-                Text("Ticker: ${stock.ticker}")
-                Text("Name: ${stock.name}")
-                Text("Currency: ${stock.currency}")
-                Text("Current Price: $${stock.priceInDollars()}")
-                if (stock.quantity != null) {
-                    Text("Quantity: ${stock.quantity}")
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            onStockRowClicked(stock.name, stock.priceInDollars().toString())
+                        }
+                ) {
+                    Text("Ticker: ${stock.ticker}")
+                    Text("Name: ${stock.name}")
+                    Text("Currency: ${stock.currency}")
+                    Text("Current Price: $${stock.priceInDollars()}")
+                    if (stock.quantity != null) {
+                        Text("Quantity: ${stock.quantity}")
+                    }
+                    Text("Current Time: ${stock.currentDateTime()}")
                 }
-                Text("Current Time: ${stock.currentDateTime()}")
 
                 HorizontalDivider()
             }
@@ -195,7 +215,9 @@ fun StocksListScreenPreviewLoading() {
     CashAppStocksTheme {
         StocksScreen(
             stocksViewState = StocksViewState.Loading,
-            onReloadClicked = {})
+            onLoadClicked = {},
+            onStockRowClicked = { x, y -> }
+        )
     }
 }
 
@@ -205,7 +227,8 @@ fun StocksListScreenPreviewError() {
     CashAppStocksTheme {
         StocksScreen(
             stocksViewState = StocksViewState.LoadingError(R.string.error_loading),
-            onReloadClicked = {})
+            onLoadClicked = {},
+            onStockRowClicked = { x, y -> })
     }
 }
 
@@ -215,7 +238,8 @@ fun StocksListScreenPreviewEmptyResult() {
     CashAppStocksTheme {
         StocksScreen(
             stocksViewState = StocksViewState.Result(Stocks(emptyList())),
-            onReloadClicked = {})
+            onLoadClicked = {},
+            onStockRowClicked = { x, y -> })
     }
 }
 
@@ -225,6 +249,8 @@ fun StocksListScreenPreviewResult() {
     CashAppStocksTheme {
         StocksScreen(
             stocksViewState = StocksViewState.Result(testData),
-            onReloadClicked = {})
+            onLoadClicked = {},
+            onStockRowClicked = { x, y -> }
+        )
     }
 }
