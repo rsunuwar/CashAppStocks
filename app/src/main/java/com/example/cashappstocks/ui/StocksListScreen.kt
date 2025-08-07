@@ -35,8 +35,7 @@ import com.example.cashappstocks.ui.theme.CashAppStocksTheme
 fun StocksListScreen(viewModel: StocksListViewModel) {
 
     val stocksViewState by viewModel.stockViewStateFlow.collectAsStateWithLifecycle()
-
-//    val stocksViewState = StocksViewState.Result(testData)
+//    val stocksViewState = StocksViewState.Result(testData) // for testing without actual network request
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -73,6 +72,7 @@ fun StocksListScreen(viewModel: StocksListViewModel) {
     }
 }
 
+// show different screen based on the stocksViewState
 @Composable
 fun StocksScreen(
     modifier: Modifier = Modifier,
@@ -111,6 +111,7 @@ fun StocksScreen(
     }
 }
 
+// screen showing loading screen with a circular progress indicator and a text
 @Composable
 fun ProgressScreen() {
     Column(
@@ -124,6 +125,8 @@ fun ProgressScreen() {
     }
 }
 
+// screen showing the result of the stocks loading network request.
+// it can either show a screen with stocks or an empty screen if there are none
 @Composable
 fun StocksResultScreen(
     stocks: Stocks,
@@ -159,6 +162,11 @@ fun StocksResultScreen(
     }
 }
 
+// screen showing no stocks with given message and button with given buttonTitle.
+// It is used -
+// 1. when the stocks are not fetched yet i.e. Uninitialized view state
+// 2. when the network query returns empty stock i.e. Result view state with empty stock list
+// 3. when the network query returns errored result i.e. LoadingError view state
 @Composable
 fun EmptyStocksScreen(
     message: String,
@@ -184,8 +192,40 @@ fun EmptyStocksScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun StocksListScreenPreview() {
+fun StocksListScreenPreviewLoading() {
     CashAppStocksTheme {
-        StocksScreen(stocksViewState = StocksViewState.Loading, onReloadClicked = {})
+        StocksScreen(
+            stocksViewState = StocksViewState.Loading,
+            onReloadClicked = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StocksListScreenPreviewError() {
+    CashAppStocksTheme {
+        StocksScreen(
+            stocksViewState = StocksViewState.LoadingError(R.string.error_loading),
+            onReloadClicked = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StocksListScreenPreviewEmptyResult() {
+    CashAppStocksTheme {
+        StocksScreen(
+            stocksViewState = StocksViewState.Result(Stocks(emptyList())),
+            onReloadClicked = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StocksListScreenPreviewResult() {
+    CashAppStocksTheme {
+        StocksScreen(
+            stocksViewState = StocksViewState.Result(testData),
+            onReloadClicked = {})
     }
 }

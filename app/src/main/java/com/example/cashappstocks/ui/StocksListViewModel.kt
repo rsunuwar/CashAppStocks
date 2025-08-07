@@ -27,13 +27,14 @@ class StocksListViewModel : ViewModel() {
 
     private val stocksApi = NetworkRequest.getStocksApi()
 
+    // method to loads stocks from the network
     fun loadStocks() {
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.IO) {
                 try {
                     _stockViewStateFlow.value = StocksViewState.Loading
 
-                    //delay(1000)
+                    //delay(1000) // delay to test Loading state
                     val result = stocksApi.getStocks()
 
                     _stockViewStateFlow.value = StocksViewState.Result(result)

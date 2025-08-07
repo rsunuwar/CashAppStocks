@@ -27,14 +27,3 @@ data class Stocks(
     @SerializedName("stocks")
     val stockList: List<Stock>
 )
-
-sealed class StocksViewState {
-
-    object UnInitialized : StocksViewState()
-
-    object Loading : StocksViewState()
-
-    data class LoadingError(val errorMessageId: Int) : StocksViewState()
-
-    data class Result(val result: Stocks) : StocksViewState()
-}
